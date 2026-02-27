@@ -1,51 +1,1387 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CodeLance</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-body { font-family: 'Inter', sans-serif; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentForge — Hire the Best Developers</title>
+    <!-- Dark mode applied before render to prevent flash -->
+    <script src="js/theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ── Dark mode CSS variables ── */
+        :root {
+            --bg: #F8F9FB;
+            --bg2: #ffffff;
+            --bg3: #f3f4f6;
+            --text: #0F0F0F;
+            --text2: #6b7280;
+            --border: #e5e7eb;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f0f0f;
+            --bg2: #1a1a1a;
+            --bg3: #252525;
+            --text: #f3f4f6;
+            --text2: #9ca3af;
+            --border: #2d2d2d;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Dark-mode overrides for white sections */
+        [data-theme="dark"] .bg-white {
+            background: var(--bg2) !important;
+        }
+
+        [data-theme="dark"] .bg-\[\#F8F9FB\] {
+            background: var(--bg) !important;
+        }
+
+        [data-theme="dark"] .border-gray-100,
+        [data-theme="dark"] .border-gray-200 {
+            border-color: var(--border) !important;
+        }
+
+        [data-theme="dark"] .text-gray-500,
+        [data-theme="dark"] .text-gray-600 {
+            color: var(--text2) !important;
+        }
+
+        [data-theme="dark"] .text-gray-700 {
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .text-gray-900 {
+            color: var(--text) !important;
+        }
+
+        [data-theme="dark"] .text-\[\#0F0F0F\] {
+            color: var(--text) !important;
+        }
+
+        [data-theme="dark"] nav.navbar {
+            background: rgba(15, 15, 15, 0.85) !important;
+            border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        [data-theme="dark"] .feature-card,
+        [data-theme="dark"] .testimonial,
+        [data-theme="dark"] .stat-card {
+            background: var(--bg2) !important;
+            border-color: var(--border) !important;
+        }
+
+        [data-theme="dark"] .ticker-tag {
+            background: var(--bg2) !important;
+            border-color: var(--border) !important;
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .step-num {
+            background: #fff;
+            color: #000;
+        }
+
+        [data-theme="dark"] footer {
+            border-color: var(--border) !important;
+        }
+
+        /* ── Dark mode toggle button ── */
+        .dm-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--bg2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .dm-toggle:hover {
+            border-color: #6366f1;
+            background: #ede9fe;
+        }
+
+        [data-theme="dark"] .dm-toggle:hover {
+            background: #312e81;
+        }
+
+        /* ── Gradient text ── */
+        .gradient-text {
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 60%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        /* ── Animated background orbs ── */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.18;
+            animation: drift 8s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: #ef4444;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: #f97316;
+            top: 100px;
+            right: -80px;
+            animation-delay: 2s;
+        }
+
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: #8b5cf6;
+            bottom: -50px;
+            left: 40%;
+            animation-delay: 4s;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+
+            to {
+                transform: translate(30px, 30px) scale(1.1);
+            }
+        }
+
+        /* ── Navbar blur ── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transition: box-shadow 0.3s;
+        }
+
+        .navbar.scrolled {
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ── Feature cards ── */
+        .feature-card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.09);
+            border-color: #fca5a5;
+        }
+
+        /* ── Skill tags scrolling ticker ── */
+        .ticker-wrap {
+            overflow: hidden;
+        }
+
+        .ticker {
+            display: flex;
+            gap: 1rem;
+            animation: ticker 25s linear infinite;
+            width: max-content;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .ticker-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 9999px;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #374151;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ── Step number ── */
+        .step-num {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: black;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Testimonial card ── */
+        .testimonial {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .testimonial:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        /* ── CTA section ── */
+        .cta-section {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1c1c1c 100%);
+            border-radius: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 70% 50%, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+        }
+
+        /* ── Stat counter ── */
+        .stat-card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 1.25rem;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ── Floating badge ── */
+        .floating-badge {
+            animation: floatBadge 3s ease-in-out infinite;
+        }
+
+        @keyframes floatBadge {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* ── Hero code window ── */
+        .code-window {
+            background: #0f172a;
+            border-radius: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-bar {
+            background: #1e293b;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .dot {
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 50%;
+        }
+
+        /* ── Scroll reveal (lightweight CSS only) ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Hero grid overlay ── */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            opacity: 0.025;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M0 0h1v40H0zM40 0h1v40h-1zM0 0v1h41V0zM0 40v1h41v-1z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+    <script src="js/transitions.js"></script>
 </head>
 
 <body class="bg-[#F8F9FB] text-[#0F0F0F]">
 
-<!-- Navbar -->
-<nav class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center bg-white/70 backdrop-blur-lg shadow-sm rounded-full mt-6">
-  <div class="text-xl font-bold flex items-center gap-2">
-    <span class="bg-black text-white px-2 py-1 rounded-md">{"</>"}</span>
-    TalentForge
-  </div>
-  <div class="space-x-8 text-sm font-medium">
-    <a href="browse.html" class="hover:text-red-500 transition">Discover Gigs</a>
-    <a href="register.html" class="hover:text-red-500 transition">Become Developer</a>
-    <a href="login.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Login</a>
-  </div>
-</nav>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold flex items-center gap-2">
+                <span class="bg-black text-white px-2 py-1 rounded-md text-sm">{"</>"}</span>
+                TalentForge
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium items-center">
+                <a href="#how-it-works" class="text-gray-600 hover:text-black transition">How it Works</a>
+                <a href="#skills" class="text-gray-600 hover:text-black transition">Skills</a>
+                <a href="browse.html" class="text-gray-600 hover:text-black transition">Discover Gigs</a>
+                <a href="register.html" class="text-gray-600 hover:text-black transition">Become a Developer</a>
+                <span id="navAuthLink">
+                    <a href="login.html"
+                        class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition text-sm">Login</a>
+                </span>
+                <!-- Dark mode toggle -->
+                <button class="dm-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" id="dmBtn">
+                    <svg id="dm-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <svg id="dm-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" style="display:none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-<!-- Hero -->
-<section class="max-w-7xl mx-auto px-6 py-32 text-center relative">
+    <!-- ═══════════════════════════════════════════
+        HERO
+  ═══════════════════════════════════════════ -->
+    <section class="relative min-h-[92vh] flex items-center overflow-hidden">
 
-  <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
-    Hire perfect <br>
-    <span class="text-red-500">Developers</span> for your <br> projects.
-  </h1>
+        <!-- Particle canvas (replaces orbs + grid) -->
+        <canvas id="particleCanvas"
+            style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
 
-  <p class="mt-8 text-gray-600 max-w-2xl mx-auto text-lg">
-    A powerful platform for clients to find skilled developers and collaborate seamlessly.
-  </p>
+        <div class="max-w-7xl mx-auto px-6 py-24 w-full grid md:grid-cols-2 gap-16 items-center">
 
-  <div class="mt-10">
-    <a href="browse.html"
-       class="bg-black text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-red-500 transition shadow-lg">
-       Find your next Hire
-    </a>
-  </div>
+            <!-- Left: Copy -->
+            <div>
+                <div
+                    class="inline-flex items-center gap-2 bg-white border border-red-100 text-red-500 text-sm font-semibold px-4 py-1.5 rounded-full mb-8 shadow-sm">
+                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    500+ Freelancers Available Now
+                </div>
 
-</section>
+                <h1 class="text-5xl md:text-6xl font-black leading-[1.08] tracking-tight">
+                    Hire perfect<br>
+                    <span class="gradient-text">Developers</span><br>
+                    for your projects.
+                </h1>
+
+                <p class="mt-6 text-gray-500 text-lg leading-relaxed max-w-lg">
+                    The fastest way to hire top-tier developers. Post a request, receive proposals, and ship faster —
+                    all in one place.
+                </p>
+
+                <div class="mt-10 flex flex-wrap gap-4">
+                    <a href="browse.html"
+                        class="bg-black text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-red-500 transition shadow-lg">
+                        Find your next Hire →
+                    </a>
+                    <a href="register.html"
+                        class="bg-white text-black border border-gray-200 px-8 py-4 rounded-xl text-base font-semibold hover:border-red-400 hover:text-red-500 transition shadow-sm">
+                        Start Freelancing Free
+                    </a>
+                </div>
+
+                <!-- Social proof -->
+                <div class="mt-10 flex items-center gap-4">
+                    <div class="flex -space-x-2">
+                        <div
+                            class="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-red-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold">
+                            A</div>
+                        <div
+                            class="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center text-white text-xs font-bold">
+                            M</div>
+                        <div
+                            class="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center text-white text-xs font-bold">
+                            S</div>
+                        <div
+                            class="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-white text-xs font-bold">
+                            R</div>
+                    </div>
+                    <p class="text-sm text-gray-500">
+                        <strong class="text-black">1,200+ clients</strong> already hired on TalentForge
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Code window (decorative) -->
+            <div class="hidden md:block relative">
+                <div class="code-window">
+                    <div class="code-bar">
+                        <div class="dot bg-red-400"></div>
+                        <div class="dot bg-yellow-400"></div>
+                        <div class="dot bg-green-400"></div>
+                        <span class="text-gray-500 text-xs ml-2">hire_request.js</span>
+                    </div>
+                    <div class="p-5 text-sm leading-relaxed">
+                        <p><span class="text-purple-400">const</span> <span class="text-blue-300">request</span> <span
+                                class="text-white">=</span> <span class="text-yellow-300">await</span> <span
+                                class="text-white">talentForge</span></p>
+                        <p class="ml-4"><span class="text-white">.</span><span class="text-green-300">hire</span><span
+                                class="text-white">({</span></p>
+                        <p class="ml-8"><span class="text-red-400">skill</span><span class="text-white">:</span> <span
+                                class="text-orange-300">"React + Node.js"</span><span class="text-white">,</span></p>
+                        <p class="ml-8"><span class="text-red-400">budget</span><span class="text-white">:</span> <span
+                                class="text-blue-300">2500</span><span class="text-white">,</span></p>
+                        <p class="ml-8"><span class="text-red-400">deadline</span><span class="text-white">:</span>
+                            <span class="text-orange-300">"2 weeks"</span>
+                        </p>
+                        <p class="ml-4"><span class="text-white">});</span></p>
+                        <br>
+                        <p><span class="text-gray-500">// ✅ Matched 12 developers</span></p>
+                        <p><span class="text-purple-400">console</span><span class="text-white">.</span><span
+                                class="text-green-300">log</span><span class="text-white">(request.</span><span
+                                class="text-blue-300">matches</span><span class="text-white">);</span></p>
+                        <br>
+                        <p><span class="text-gray-500">// 💳 Payment secured in escrow</span></p>
+                        <p><span class="text-gray-500">// 🚀 Project started in 24h</span></p>
+                    </div>
+                </div>
+
+                <!-- Floating badge 1 -->
+                <div
+                    class="floating-badge absolute -top-4 -right-4 bg-white border border-gray-100 shadow-lg rounded-2xl px-4 py-3 flex items-center gap-2">
+                    <span class="text-2xl">⚡</span>
+                    <div>
+                        <p class="text-xs font-bold text-gray-900">Avg. Response</p>
+                        <p class="text-xs text-gray-400">Under 2 hours</p>
+                    </div>
+                </div>
+
+                <!-- Floating badge 2 -->
+                <div class="floating-badge absolute -bottom-4 -left-4 bg-black text-white rounded-2xl px-4 py-3 flex items-center gap-2"
+                    style="animation-delay:1.5s">
+                    <span class="text-2xl">🔒</span>
+                    <div>
+                        <p class="text-xs font-bold">Escrow Protected</p>
+                        <p class="text-xs text-gray-400">Pay only when satisfied</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+        SKILLS TICKER
+  ═══════════════════════════════════════════ -->
+    <section id="skills" class="py-12 border-y border-gray-100 bg-white">
+        <div class="ticker-wrap">
+            <div class="ticker">
+                <!-- Duplicated for seamless loop -->
+                <span class="ticker-tag">⚛️ React</span>
+                <span class="ticker-tag">🟢 Node.js</span>
+                <span class="ticker-tag">🐍 Python</span>
+                <span class="ticker-tag">☕ Java</span>
+                <span class="ticker-tag">🦀 Rust</span>
+                <span class="ticker-tag">🐘 PostgreSQL</span>
+                <span class="ticker-tag">🔷 TypeScript</span>
+                <span class="ticker-tag">📱 Flutter</span>
+                <span class="ticker-tag">🤖 Machine Learning</span>
+                <span class="ticker-tag">☁️ AWS</span>
+                <span class="ticker-tag">🐳 Docker</span>
+                <span class="ticker-tag">🔥 Firebase</span>
+                <span class="ticker-tag">🎨 UI/UX Design</span>
+                <span class="ticker-tag">🕸️ GraphQL</span>
+                <span class="ticker-tag">⚛️ React</span>
+                <span class="ticker-tag">🟢 Node.js</span>
+                <span class="ticker-tag">🐍 Python</span>
+                <span class="ticker-tag">☕ Java</span>
+                <span class="ticker-tag">🦀 Rust</span>
+                <span class="ticker-tag">🐘 PostgreSQL</span>
+                <span class="ticker-tag">🔷 TypeScript</span>
+                <span class="ticker-tag">📱 Flutter</span>
+                <span class="ticker-tag">🤖 Machine Learning</span>
+                <span class="ticker-tag">☁️ AWS</span>
+                <span class="ticker-tag">🐳 Docker</span>
+                <span class="ticker-tag">🔥 Firebase</span>
+                <span class="ticker-tag">🎨 UI/UX Design</span>
+                <span class="ticker-tag">🕸️ GraphQL</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+        STATS
+  ═══════════════════════════════════════════ -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 reveal">
+            <div class="stat-card">
+                <p class="text-4xl font-black text-red-500">500+</p>
+                <p class="text-sm text-gray-500 mt-1 font-medium">Vetted Freelancers</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-4xl font-black text-red-500">1.2k+</p>
+                <p class="text-sm text-gray-500 mt-1 font-medium">Projects Completed</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-4xl font-black text-red-500">$2M+</p>
+                <p class="text-sm text-gray-500 mt-1 font-medium">Paid to Freelancers</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-4xl font-black text-red-500">98%</p>
+                <p class="text-sm text-gray-500 mt-1 font-medium">Client Satisfaction</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+        FEATURES
+  ═══════════════════════════════════════════ -->
+    <section class="max-w-7xl mx-auto px-6 pb-24">
+        <div class="text-center mb-14 reveal">
+            <p class="text-red-500 text-sm font-semibold uppercase tracking-widest mb-3">Why TalentForge</p>
+            <h2 class="text-4xl font-extrabold">Everything you need to<br>hire with confidence</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 reveal">
+            <div class="feature-card">
+                <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-2xl mb-5">🎯</div>
+                <h3 class="font-bold text-lg mb-2">Curated Talent</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Every freelancer is skill-verified. Browse profiles
+                    with real portfolios, rates, and availability at a glance.</p>
+            </div>
+            <div class="feature-card">
+                <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl mb-5">💳</div>
+                <h3 class="font-bold text-lg mb-2">Escrow Payments</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Your payment is held securely until you're satisfied.
+                    Release funds with one click when work is complete.</p>
+            </div>
+            <div class="feature-card">
+                <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl mb-5">⚡</div>
+                <h3 class="font-bold text-lg mb-2">Fast Matching</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Send a hire request, get a response in hours, and start
+                    your project — all without leaving the platform.</p>
+            </div>
+            <div class="feature-card">
+                <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-2xl mb-5">🛡️</div>
+                <h3 class="font-bold text-lg mb-2">Fraud Protection</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">PCI-DSS compliant payments with 256-bit SSL encryption
+                    and real-time fraud monitoring.</p>
+            </div>
+            <div class="feature-card">
+                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl mb-5">📊</div>
+                <h3 class="font-bold text-lg mb-2">Full Dashboard</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Track every hire request, payment, and project status
+                    from a single, beautifully designed dashboard.</p>
+            </div>
+            <div class="feature-card">
+                <div class="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center text-2xl mb-5">🌍</div>
+                <h3 class="font-bold text-lg mb-2">Global Talent</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Access developers from around the world. Filter by
+                    skill, rate, and availability to find the perfect match.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+        HOW IT WORKS
+  ═══════════════════════════════════════════ -->
+    <section id="how-it-works" class="bg-white py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-14 reveal">
+                <p class="text-red-500 text-sm font-semibold uppercase tracking-widest mb-3">Simple Process</p>
+                <h2 class="text-4xl font-extrabold">How it works</h2>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-8 reveal">
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">1</div>
+                    <h4 class="font-bold mb-2">Browse Freelancers</h4>
+                    <p class="text-gray-500 text-sm">Filter by skill, availability, and hourly rate to find the right
+                        developer.</p>
+                </div>
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">2</div>
+                    <h4 class="font-bold mb-2">Send a Hire Request</h4>
+                    <p class="text-gray-500 text-sm">Describe your project scope and budget. The freelancer reviews and
+                        accepts.</p>
+                </div>
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">3</div>
+                    <h4 class="font-bold mb-2">Pay Securely</h4>
+                    <p class="text-gray-500 text-sm">Pay via card. Funds are held in escrow and released when you
+                        approve the work.</p>
+                </div>
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">4</div>
+                    <h4 class="font-bold mb-2">Ship It 🚀</h4>
+                    <p class="text-gray-500 text-sm">Collaborate and deliver. Leave a review to help the community grow.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+        TESTIMONIALS
+  ═══════════════════════════════════════════ -->
+    <section class="max-w-7xl mx-auto px-6 py-24">
+        <div class="text-center mb-14 reveal">
+            <p class="text-red-500 text-sm font-semibold uppercase tracking-widest mb-3">Testimonials</p>
+            <h2 class="text-4xl font-extrabold">Loved by teams worldwide</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 reveal">
+            <div class="testimonial">
+                <div class="flex gap-1 mb-4 text-yellow-400 text-lg">★★★★★</div>
+                <p class="text-gray-700 text-sm leading-relaxed">"Found an incredible React developer within 24 hours.
+                    The escrow payment gave us total peace of mind. TalentForge is now our go-to for every project."</p>
+                <div class="flex items-center gap-3 mt-5">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                        S</div>
+                    <div>
+                        <p class="font-semibold text-sm">Siddharth Rao</p>
+                        <p class="text-gray-400 text-xs">CTO, StartupXYZ</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial border-red-100">
+                <div class="flex gap-1 mb-4 text-yellow-400 text-lg">★★★★★</div>
+                <p class="text-gray-700 text-sm leading-relaxed">"As a freelancer, TalentForge helped me land 3 clients
+                    in my first month. The profile system is clean and clients are serious. Highly recommend."</p>
+                <div class="flex items-center gap-3 mt-5">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
+                        P</div>
+                    <div>
+                        <p class="font-semibold text-sm">Priya Menon</p>
+                        <p class="text-gray-400 text-xs">Full-Stack Developer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial">
+                <div class="flex gap-1 mb-4 text-yellow-400 text-lg">★★★★★</div>
+                <p class="text-gray-700 text-sm leading-relaxed">"The payment gateway is seamless — no awkward bank
+                    transfers. I just enter my card, funds go to escrow, and release on approval. Brilliant."</p>
+                <div class="flex items-center gap-3 mt-5">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-red-400 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
+                        A</div>
+                    <div>
+                        <p class="font-semibold text-sm">Aditya Shah</p>
+                        <p class="text-gray-400 text-xs">Product Manager, TechCo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+        CTA BANNER
+  ═══════════════════════════════════════════ -->
+    <section class="max-w-7xl mx-auto px-6 pb-24">
+        <div class="cta-section py-20 px-12 text-center text-white reveal">
+            <h2 class="text-4xl md:text-5xl font-black mb-4">Ready to build something great?</h2>
+            <p class="text-gray-400 text-lg mb-10 max-w-xl mx-auto">Join thousands of clients and developers already
+                shipping faster on TalentForge.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="browse.html"
+                    class="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition">
+                    Browse Developers
+                </a>
+                <a href="register.html"
+                    class="border border-gray-600 text-white px-8 py-4 rounded-xl font-bold hover:border-white transition">
+                    Join as Freelancer
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 py-12">
+        <div
+            class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-gray-500">
+            <div class="flex items-center gap-2 font-bold text-black">
+                <span class="bg-black text-white px-2 py-1 rounded-md text-xs">{"</>"}</span>
+                TalentForge
+            </div>
+            <div class="flex gap-8">
+                <a href="browse.html" class="hover:text-black transition">Find Talent</a>
+                <a href="register.html" class="hover:text-black transition">Become a Dev</a>
+                <a href="login.html" class="hover:text-black transition">Login</a>
+            </div>
+            <p>© 2026 TalentForge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- ═══ PARTICLE CANVAS JS ═══ -->
+    <script>
+        (function () {
+            const canvas = document.getElementById('particleCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let particles = [], W, H, animId;
+            const COUNT = 70, MAX_DIST = 130;
+
+            function resize() {
+                W = canvas.width = canvas.offsetWidth;
+                H = canvas.height = canvas.offsetHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+
+            class Particle {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * W;
+                    this.y = Math.random() * H;
+                    this.vx = (Math.random() - 0.5) * 0.6;
+                    this.vy = (Math.random() - 0.5) * 0.6;
+                    this.r = Math.random() * 2 + 1;
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x < 0 || this.x > W) this.vx *= -1;
+                    if (this.y < 0 || this.y > H) this.vy *= -1;
+                }
+            }
+
+            for (let i = 0; i < COUNT; i++) particles.push(new Particle());
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                const dark = isDark();
+                const dotColor = dark ? 'rgba(139,92,246,0.55)' : 'rgba(99,102,241,0.35)';
+                const lineColor = dark ? 'rgba(139,92,246,' : 'rgba(99,102,241,';
+
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    const p = particles[i];
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = dotColor;
+                    ctx.fill();
+
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const q = particles[j];
+                        const dx = p.x - q.x, dy = p.y - q.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < MAX_DIST) {
+                            const alpha = (1 - dist / MAX_DIST) * 0.25;
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+                            ctx.strokeStyle = lineColor + alpha + ')';
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                animId = requestAnimationFrame(draw);
+            }
+            draw();
+            // Re-draw colors on theme change
+            const observer = new MutationObserver(draw);
+            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        })();
+    </script>
+
+    <!-- ═══ ANIMATED STATS COUNTER ═══ -->
+    <script>
+        (function () {
+            const targets = [
+                { el: null, selector: '.stat-card:nth-child(1) p:first-child', end: 500, suffix: '+', prefix: '' },
+                { el: null, selector: '.stat-card:nth-child(2) p:first-child', end: 1200, suffix: '+', prefix: '' },
+                { el: null, selector: '.stat-card:nth-child(3) p:first-child', end: 2, suffix: 'M+', prefix: '$' },
+                { el: null, selector: '.stat-card:nth-child(4) p:first-child', end: 98, suffix: '%', prefix: '' },
+            ];
+
+            function countUp(el, end, suffix, prefix, duration) {
+                let start = 0, startTime = null;
+                function step(ts) {
+                    if (!startTime) startTime = ts;
+                    const progress = Math.min((ts - startTime) / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+                    const val = Math.floor(ease * end);
+                    el.textContent = prefix + val + suffix;
+                    if (progress < 1) requestAnimationFrame(step);
+                    else el.textContent = prefix + end + suffix;
+                }
+                requestAnimationFrame(step);
+            }
+
+            const section = document.querySelector('.grid.grid-cols-2.md\\:grid-cols-4');
+            if (!section) return;
+
+            let fired = false;
+            const obs = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting && !fired) {
+                    fired = true;
+                    const cards = section.querySelectorAll('.stat-card');
+                    const defs = [
+                        { end: 500, suffix: '+', prefix: '' },
+                        { end: 1200, suffix: '+', prefix: '' },
+                        { end: 2, suffix: 'M+', prefix: '$' },
+                        { end: 98, suffix: '%', prefix: '' },
+                    ];
+                    cards.forEach((card, i) => {
+                        const el = card.querySelector('p:first-child');
+                        if (el && defs[i]) countUp(el, defs[i].end, defs[i].suffix, defs[i].prefix, 1800);
+                    });
+                }
+            }, { threshold: 0.3 });
+            obs.observe(section);
+        })();
+    </script>
+
+    <!-- ═══ LIVE ACTIVITY FEED ═══ -->
+    <script>
+        (function () {
+            const ticker = document.getElementById('activityTicker');
+            if (!ticker) return;
+
+            const events = [
+                '🎉 Arjun just hired a React Developer',
+                '✅ Priya Menon accepted a Full Stack project · $1,200',
+                '💳 Payment of $850 released to dev aditya_codes',
+                '🚀 Siddharth posted a new Node.js gig',
+                '⭐ Client rated Kiran 5/5 — "Exceptional work!"',
+                '🎉 Meera landed her first TalentForge client',
+                '✅ ML model project accepted · $3,500',
+                '💳 Escrow payment of $620 completed successfully',
+                '🚀 New Flutter developer joined — Available now',
+                '⭐ 98% client satisfaction this month on TalentForge',
+            ];
+
+            const sep = ' &nbsp;·&nbsp; ';
+            // Build two copies for seamless loop
+            const allText = events.join(sep) + sep;
+            const inner = allText + allText;
+
+            const span = document.createElement('span');
+            span.style.cssText = 'white-space:nowrap; animation: actScroll 40s linear infinite; display:inline-block; padding-left:1rem;';
+            span.innerHTML = inner;
+            ticker.appendChild(span);
+        })();
+    </script>
+
+    <!-- Auth-aware nav + scroll + reveal -->
+    <script type="module">
+        import { auth } from "./firebase/firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+        // Auth aware
+        onAuthStateChanged(auth, (user) => {
+            const el = document.getElementById("navAuthLink");
+            if (user) {
+                el.innerHTML = `<a href="dashboard.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition text-sm">Dashboard</a>`;
+            }
+        });
+
+        // Navbar scroll shadow
+        const navbar = document.getElementById("navbar");
+        window.addEventListener("scroll", () => {
+            navbar.classList.toggle("scrolled", window.scrollY > 20);
+        });
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener("click", e => {
+                e.preventDefault();
+                document.querySelector(a.getAttribute("href"))?.scrollIntoView({ behavior: "smooth" });
+            });
+        });
+    </script>
+    <!-- ═══════════════════════════════════════════
+        GEMINI CHATBOT WIDGET
+  ═══════════════════════════════════════════ -->
+
+    <!-- Floating toggle button -->
+    <button id="chatToggle" aria-label="Open chat assistant" style="
+      position:fixed; bottom:2rem; right:2rem; z-index:1000;
+      width:60px; height:60px; border-radius:50%; border:none; cursor:pointer;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      box-shadow: 0 8px 32px rgba(99,102,241,0.45);
+      display:flex; align-items:center; justify-content:center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    ">
+        <!-- Chat icon (default) -->
+        <svg id="iconChat" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <!-- Close icon (when open) -->
+        <svg id="iconClose" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+            stroke-linecap="round" style="display:none">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+        <!-- Pulse ring -->
+        <span style="
+      position:absolute; inset:-4px; border-radius:50%;
+      border:2px solid rgba(99,102,241,0.4);
+      animation: chatPulse 2s ease-out infinite;
+    "></span>
+    </button>
+
+    <!-- Chat window -->
+    <div id="chatWindow" style="
+    position:fixed; bottom:6.5rem; right:2rem; z-index:999;
+    width:380px; max-height:560px;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(20px);
+    border-radius:1.25rem;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06);
+    display:none; flex-direction:column; overflow:hidden;
+    animation: chatSlide 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
+  ">
+        <!-- Header -->
+        <div style="
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      padding: 1rem 1.25rem;
+      display:flex; align-items:center; gap:0.75rem;
+    ">
+            <div style="
+        width:36px; height:36px; border-radius:50%;
+        background:rgba(255,255,255,0.2);
+        display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+        flex-shrink:0;
+      ">✨</div>
+            <div>
+                <p style="color:white; font-weight:700; font-size:0.9rem; margin:0;">TalentForge AI</p>
+                <p style="color:rgba(255,255,255,0.75); font-size:0.72rem; margin:0;">Powered by Gemini · Freelancing
+                    Expert</p>
+            </div>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:0.35rem;">
+                <span
+                    style="width:8px; height:8px; border-radius:50%; background:#4ade80; animation:chatPulse 2s infinite;"></span>
+                <span style="color:rgba(255,255,255,0.7); font-size:0.7rem;">Online</span>
+            </div>
+        </div>
+
+        <!-- Messages area -->
+        <div id="chatMessages" style="
+      flex:1; overflow-y:auto; padding:1rem;
+      display:flex; flex-direction:column; gap:0.75rem;
+      max-height:360px; scroll-behavior:smooth;
+    ">
+            <!-- Welcome message -->
+            <div class="chat-msg bot" style="display:flex; gap:0.6rem; align-items:flex-start;">
+                <div
+                    style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">
+                    ✨</div>
+                <div
+                    style="background:#f3f4f6; border-radius:0 1rem 1rem 1rem; padding:0.65rem 0.9rem; max-width:85%; font-size:0.82rem; line-height:1.5; color:#111;">
+                    👋 Hi! I'm your freelancing assistant. Ask me anything about:<br><br>
+                    • Finding clients & pricing your work<br>
+                    • Writing proposals & contracts<br>
+                    • Growing your freelance career<br>
+                    • How TalentForge works<br><br>
+                    What would you like to know?
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggested prompts -->
+        <div id="chatSuggestions" style="padding:0 1rem 0.6rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
+            <button class="chat-chip" onclick="sendSuggestion('How should I price my services?')">💰 Pricing
+                tips</button>
+            <button class="chat-chip" onclick="sendSuggestion('How do I write a great proposal?')">📝 Proposals</button>
+            <button class="chat-chip" onclick="sendSuggestion('How does TalentForge payment work?')">💳
+                Payments</button>
+            <button class="chat-chip" onclick="sendSuggestion('Tips to get my first client')">🚀 First client</button>
+        </div>
+
+        <!-- Input bar -->
+        <div style="
+      border-top:1px solid #f3f4f6;
+      padding:0.75rem 1rem;
+      display:flex; gap:0.5rem; align-items:flex-end;
+    ">
+            <textarea id="chatInput" rows="1" placeholder="Ask about freelancing…" style="
+          flex:1; border:1.5px solid #e5e7eb; border-radius:0.75rem;
+          padding:0.6rem 0.75rem; font-size:0.83rem; font-family:inherit;
+          outline:none; resize:none; line-height:1.4; max-height:100px;
+          transition:border-color 0.2s;
+        " onkeydown="handleChatKey(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+            <button id="chatSendBtn" onclick="sendChatMessage()" style="
+        width:38px; height:38px; border:none; border-radius:0.65rem; cursor:pointer;
+        background:linear-gradient(135deg,#6366f1,#8b5cf6); flex-shrink:0;
+        display:flex; align-items:center; justify-content:center;
+        transition:transform 0.15s, opacity 0.15s;
+      ">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes chatPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1
+            }
+
+            50% {
+                transform: scale(1.15);
+                opacity: 0.5
+            }
+        }
+
+        @keyframes chatSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.97)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        @keyframes chatDots {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0)
+            }
+
+            40% {
+                transform: scale(1)
+            }
+        }
+
+        #chatToggle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 36px rgba(99, 102, 241, 0.5);
+        }
+
+        #chatMessages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #chatMessages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chatMessages::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 2px;
+        }
+
+        .chat-chip {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 9999px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.73rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #374151;
+            transition: background 0.15s, border-color 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chat-chip:hover {
+            background: #ede9fe;
+            border-color: #a5b4fc;
+            color: #4f46e5;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #9ca3af;
+            display: inline-block;
+            animation: chatDots 1.2s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+    </style>
+
+    <script>
+        // ─────────────────────────────────────────────────────────
+        //   🔑 PASTE YOUR GEMINI API KEY HERE
+        // ─────────────────────────────────────────────────────────
+        const GEMINI_API_KEY = "AIzaSyBV9uZ2WnLDR7z8zNghQs-NN-6pAmdpBZM";
+        // ─────────────────────────────────────────────────────────
+
+        const GEMINI_API_URL =
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        const SYSTEM_PROMPT = `You are TalentForge AI, a friendly and knowledgeable freelancing assistant built into the TalentForge platform — a marketplace where clients hire skilled developers.
+
+Your expertise covers:
+- Freelancing best practices: pricing, proposals, contracts, client communication
+- How TalentForge works: browsing freelancers, sending hire requests, escrow payments, dashboards
+- Getting started as a freelancer: building a profile, setting rates, finding first clients
+- Growing a freelance career: building reputation, upselling, retainers
+- Tech skills in demand: which skills to learn, how to showcase them
+- Payment & financial advice: invoicing, taxes for freelancers, setting rates
+
+Guidelines:
+- Keep answers concise, warm, and practical (2-4 short paragraphs max)
+- Use bullet points for clarity when listing steps or tips
+- If asked about TalentForge-specific features, explain how they work on this platform
+- If asked something unrelated to freelancing or TalentForge, politely redirect
+- Use relevant emojis sparingly to make responses friendly`;
+
+        let chatHistory = [];
+        let chatOpen = false;
+        let isSending = false;
+
+        /* ── Toggle ── */
+        document.getElementById("chatToggle").addEventListener("click", () => {
+            chatOpen = !chatOpen;
+            const win = document.getElementById("chatWindow");
+            const iconChat = document.getElementById("iconChat");
+            const iconClose = document.getElementById("iconClose");
+            win.style.display = chatOpen ? "flex" : "none";
+            iconChat.style.display = chatOpen ? "none" : "block";
+            iconClose.style.display = chatOpen ? "block" : "none";
+            if (chatOpen) document.getElementById("chatInput").focus();
+        });
+
+        /* ── Keyboard: Enter to send, Shift+Enter for newline ── */
+        function handleChatKey(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        /* ── Suggestion chip ── */
+        window.sendSuggestion = function (text) {
+            document.getElementById("chatInput").value = text;
+            document.getElementById("chatSuggestions").style.display = "none";
+            sendChatMessage();
+        };
+
+        /* ── Append message bubble ── */
+        function appendMessage(role, html) {
+            const container = document.getElementById("chatMessages");
+            const isBot = role === "bot";
+            const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+            const wrapper = document.createElement("div");
+            wrapper.style.cssText = `display:flex; gap:0.6rem; align-items:flex-start; ${isBot ? "" : "flex-direction:row-reverse;"}`;
+
+            wrapper.innerHTML = `
+        ${isBot
+                    ? `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">✨</div>`
+                    : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;color:white;font-size:0.7rem;font-weight:700;flex-shrink:0;">You</div>`
+                }
+        <div style="max-width:82%;">
+          <div style="
+            background:${isBot ? "#f3f4f6" : "linear-gradient(135deg,#6366f1,#8b5cf6)"};
+            color:${isBot ? "#111" : "white"};
+            border-radius:${isBot ? "0 1rem 1rem 1rem" : "1rem 0 1rem 1rem"};
+            padding:0.65rem 0.9rem; font-size:0.82rem; line-height:1.6;
+          ">${html}</div>
+          <p style="font-size:0.65rem;color:#9ca3af;margin:0.25rem 0.25rem 0;text-align:${isBot ? "left" : "right"}">${time}</p>
+        </div>`;
+
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+            return wrapper;
+        }
+
+        /* ── Typing indicator ── */
+        function showTyping() {
+            const container = document.getElementById("chatMessages");
+            const el = document.createElement("div");
+            el.id = "typingIndicator";
+            el.style.cssText = "display:flex; gap:0.6rem; align-items:center;";
+            el.innerHTML = `
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;">✨</div>
+        <div style="background:#f3f4f6;border-radius:0 1rem 1rem 1rem;padding:0.6rem 0.9rem;display:flex;gap:4px;align-items:center;">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>`;
+            container.appendChild(el);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTyping() {
+            document.getElementById("typingIndicator")?.remove();
+        }
+
+        /* ── Format markdown-lite response ── */
+        function formatResponse(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                .replace(/`(.*?)`/g, "<code style='background:#e5e7eb;padding:0.1em 0.3em;border-radius:3px;font-size:0.8em'>$1</code>")
+                .replace(/^[-•]\s(.+)/gm, "<li>$1</li>")
+                .replace(/(<li>.*<\/li>)/gs, "<ul style='margin:0.4em 0 0.4em 1rem;padding:0;'>$1</ul>")
+                .replace(/\n{2,}/g, "<br><br>")
+                .replace(/\n/g, "<br>");
+        }
+
+        /* ── Send message ── */
+        window.sendChatMessage = async function () {
+            if (isSending) return;
+            const input = document.getElementById("chatInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Hide suggestion chips after first user message
+            document.getElementById("chatSuggestions").style.display = "none";
+
+            input.value = "";
+            input.style.height = "auto";
+
+            // Disable send btn
+            isSending = true;
+            document.getElementById("chatSendBtn").style.opacity = "0.5";
+
+            // Show user message
+            appendMessage("user", text);
+
+            // Add to history
+            chatHistory.push({ role: "user", parts: [{ text }] });
+
+            // Show typing
+            showTyping();
+
+            try {
+                const response = await fetch(GEMINI_API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [
+                            // System prompt injected as opening user/model exchange
+                            { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+                            { role: "model", parts: [{ text: "Understood! I'm TalentForge AI, ready to help with all your freelancing questions. What would you like to know?" }] },
+                            ...chatHistory
+                        ],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 600,
+                            topP: 0.9
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error?.message || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. Please try again.";
+
+                removeTyping();
+                appendMessage("bot", formatResponse(replyText));
+
+                // Add assistant reply to history
+                chatHistory.push({ role: "model", parts: [{ text: replyText }] });
+
+                // Keep history to last 20 turns to avoid token overflow
+                if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
+            } catch (err) {
+                removeTyping();
+                console.error("Gemini API error:", err);
+
+                let errMsg = `⚠️ Error: ${err.message}`;
+                if (err.message.toLowerCase().includes("api key") || err.message.includes("400")) {
+                    errMsg = "⚠️ Invalid API key. Please check the key in the script.";
+                } else if (err.message.includes("429")) {
+                    errMsg = "⚠️ Rate limit hit. Please wait a moment and try again.";
+                } else if (err.message.includes("404") || err.message.includes("not found")) {
+                    errMsg = "⚠️ Model not found. The API key may not have access to Gemini 2.5 Flash yet.";
+                } else if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+                    errMsg = "⚠️ Network error. If running from a local file, try serving via a local server (e.g. Live Server in VS Code).";
+                }
+                appendMessage("bot", errMsg);
+            } finally {
+                isSending = false;
+                document.getElementById("chatSendBtn").style.opacity = "1";
+                document.getElementById("chatInput").focus();
+            }
+        };
+    </script>
 
 </body>
+
 </html>

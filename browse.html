@@ -1,34 +1,259 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Discover Developers</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>body{font-family:'Inter',sans-serif}</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Freelancers | TalentForge</title>
+  <script src="js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="js/transitions.js" defer></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #111;
+      color: #fff;
+      padding: 0.85rem 1.4rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid #e5e7eb;
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 4rem auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Card hover lift */
+    .freelancer-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .freelancer-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 
-<body class="bg-[#F8F9FB]">
+<body class="bg-[#F8F9FB] text-[#0F0F0F]">
 
-<div class="max-w-7xl mx-auto px-6 py-20">
+  <!-- Toast -->
+  <div id="toast"></div>
 
-<h2 class="text-4xl font-bold mb-12">Discover Developers</h2>
-
-<div class="grid md:grid-cols-3 gap-10">
-
-  <div class="bg-white p-8 rounded-3xl shadow-md hover:shadow-xl transition">
-    <h3 class="text-xl font-semibold">Akash Sharma</h3>
-    <p class="text-gray-500 mt-2">Full Stack Developer</p>
-    <p class="text-red-500 font-semibold mt-3">$30/hr</p>
-    <a href="profile.html"
-       class="inline-block mt-6 bg-black text-white px-6 py-2 rounded-xl hover:bg-red-500 transition">
-       View Profile
+  <!-- Navbar -->
+  <nav
+    class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center bg-white/70 backdrop-blur-lg shadow-sm rounded-full mt-6">
+    <a href="index.html" class="text-xl font-bold flex items-center gap-2">
+      <span class="bg-black text-white px-2 py-1 rounded-md">{"</>"}</span>
+      TalentForge
     </a>
+    <div class="space-x-6 text-sm font-medium flex items-center">
+      <a href="browse.html" class="text-red-500 font-semibold">Discover Gigs</a>
+      <span id="navAuthLink">
+        <a href="login.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Login</a>
+      </span>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-6 py-16">
+
+    <div class="mb-12">
+      <h2 class="text-4xl font-extrabold">Discover Freelancers</h2>
+      <p class="text-gray-500 mt-2 text-lg">Find the perfect developer for your project.</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row gap-4 mb-10 bg-white p-4 rounded-2xl shadow-sm">
+      <input type="text" id="searchInput" placeholder="🔍  Search by skill (e.g. React, Python)..."
+        class="px-5 py-3 rounded-xl border w-full md:w-1/2 focus:ring-2 focus:ring-red-400 outline-none transition">
+
+      <select id="availabilityFilter"
+        class="px-5 py-3 rounded-xl border w-full md:w-1/4 focus:ring-2 focus:ring-red-400 outline-none transition">
+        <option value="">All Availability</option>
+        <option value="available">✅ Available</option>
+        <option value="busy">🟡 Busy</option>
+        <option value="unavailable">🔴 Unavailable</option>
+      </select>
+
+      <button id="resetBtn"
+        class="px-5 py-3 rounded-xl border border-gray-300 text-gray-600 hover:border-red-400 hover:text-red-500 transition w-full md:w-auto">
+        Reset Filters
+      </button>
+    </div>
+
+    <!-- Results count -->
+    <p id="resultsCount" class="text-sm text-gray-400 mb-6"></p>
+
+    <!-- Grid -->
+    <div id="freelancerGrid" class="grid md:grid-cols-3 gap-8"></div>
+
   </div>
 
-</div>
+  <script type="module">
+    import { getAllFreelancers } from "./js/auth.js";
+    import { auth } from "./firebase/firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-</div>
+    const grid = document.getElementById("freelancerGrid");
+    const searchInput = document.getElementById("searchInput");
+    const availabilityFilter = document.getElementById("availabilityFilter");
+    const resultsCount = document.getElementById("resultsCount");
+    const resetBtn = document.getElementById("resetBtn");
+    const navAuthLink = document.getElementById("navAuthLink");
+
+    let freelancers = [];
+    let currentUser = null;
+
+    /* ── Toast ── */
+    function showToast(msg, duration = 3000) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), duration);
+    }
+
+    /* ── Auth-aware navbar ── */
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        navAuthLink.innerHTML = `<a href="dashboard.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Dashboard</a>`;
+      } else {
+        navAuthLink.innerHTML = `<a href="login.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Login</a>`;
+      }
+    });
+
+    /* ── Render ── */
+    function renderFreelancers(list) {
+      grid.innerHTML = "";
+
+      resultsCount.textContent = list.length === 0
+        ? "No freelancers found."
+        : `Showing ${list.length} freelancer${list.length !== 1 ? "s" : ""}`;
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-3 text-center py-20 text-gray-400">
+            <div class="text-5xl mb-4">🔍</div>
+            <p class="text-lg font-medium">No freelancers match your search.</p>
+            <p class="text-sm mt-1">Try different keywords or clear the filters.</p>
+          </div>`;
+        return;
+      }
+
+      list.forEach(f => {
+        const availColor = f.availability === "available"
+          ? "bg-green-100 text-green-700"
+          : f.availability === "busy"
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-gray-200 text-gray-600";
+
+        const availIcon = f.availability === "available" ? "✅" : f.availability === "busy" ? "🟡" : "🔴";
+
+        const skillsArr = Array.isArray(f.skills) ? f.skills : (f.skills ? f.skills.split(",").map(s => s.trim()) : []);
+        const skillsHtml = skillsArr.length
+          ? skillsArr.slice(0, 4).map(s =>
+            `<span class="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md">${s}</span>`
+          ).join(" ")
+          : `<span class="text-gray-400 text-sm">No skills listed</span>`;
+
+        const card = `
+          <div class="freelancer-card bg-white p-8 rounded-3xl shadow-md">
+            <div class="flex items-center gap-4 mb-5">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-orange-300 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                ${(f.bio ? f.bio[0] : "F").toUpperCase()}
+              </div>
+              <div>
+                <h3 class="text-base font-semibold leading-tight">${f.bio ? f.bio.substring(0, 50) + (f.bio.length > 50 ? "…" : "") : "Freelancer"}</h3>
+                <p class="text-red-500 font-semibold text-sm mt-0.5">$${f.rate || 0}/hr</p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 mb-4">${skillsHtml}</div>
+
+            <span class="inline-block text-xs px-3 py-1 rounded-full font-medium ${availColor} mb-5">
+              ${availIcon} ${f.availability || "Unknown"}
+            </span>
+
+            <a href="profile.html?id=${f.id}"
+               class="block mt-2 bg-black text-white text-center py-2.5 rounded-xl hover:bg-red-500 transition font-medium">
+               View Profile
+            </a>
+          </div>`;
+
+        grid.innerHTML += card;
+      });
+    }
+
+    /* ── Filter logic (fix: empty search shows all) ── */
+    function applyFilters() {
+      const search = searchInput.value.trim().toLowerCase();
+      const availability = availabilityFilter.value;
+
+      const filtered = freelancers.filter(f => {
+        const skillsStr = Array.isArray(f.skills) ? f.skills.join(" ").toLowerCase() : (f.skills || "").toLowerCase();
+        const matchesSkill = search === ""
+          ? true
+          : skillsStr.includes(search) || (f.bio ? f.bio.toLowerCase().includes(search) : false);
+
+        const matchesAvailability = availability
+          ? f.availability === availability
+          : true;
+
+        return matchesSkill && matchesAvailability;
+      });
+
+      renderFreelancers(filtered);
+    }
+
+    /* ── Reset ── */
+    resetBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      availabilityFilter.value = "";
+      renderFreelancers(freelancers);
+    });
+
+    /* ── Initial load ── */
+    grid.innerHTML = `<div class="col-span-3"><div class="spinner"></div></div>`;
+
+    freelancers = await getAllFreelancers();
+    renderFreelancers(freelancers);
+
+    searchInput.addEventListener("input", applyFilters);
+    availabilityFilter.addEventListener("change", applyFilters);
+
+  </script>
 
 </body>
+
 </html>

@@ -1,35 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Login | CodeLance</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>body{font-family:'Inter',sans-serif}</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | TalentForge</title>
+  <script src="js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="js/transitions.js" defer></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #dc2626;
+      color: #fff;
+      padding: 0.85rem 1.4rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
 
-<body class="bg-[#F8F9FB] flex items-center justify-center min-h-screen">
+<body class="bg-[#F8F9FB] flex items-center justify-center min-h-screen px-4">
 
-<div class="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
-  <h2 class="text-3xl font-bold mb-8 text-center">Welcome Back</h2>
+  <div id="toast"></div>
 
-  <form class="space-y-5">
-    <input type="email" placeholder="Email"
-      class="w-full px-5 py-3 rounded-xl border focus:ring-2 focus:ring-red-500 outline-none">
+  <div class="w-full max-w-md">
 
-    <input type="password" placeholder="Password"
-      class="w-full px-5 py-3 rounded-xl border focus:ring-2 focus:ring-red-500 outline-none">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <a href="index.html" class="inline-flex items-center gap-2 text-xl font-bold">
+        <span class="bg-black text-white px-2 py-1 rounded-md">{"</>"}</span>
+        TalentForge
+      </a>
+    </div>
 
-    <button class="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-red-500 transition">
-      Login
-    </button>
-  </form>
+    <div class="bg-white p-10 rounded-3xl shadow-xl">
+      <h2 class="text-2xl font-extrabold mb-1 text-center">Welcome back</h2>
+      <p class="text-gray-500 text-sm text-center mb-8">Sign in to your TalentForge account</p>
 
-  <p class="text-center mt-6 text-sm">
-    No account?
-    <a href="register.html" class="text-red-500 font-semibold">Register</a>
-  </p>
-</div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="email" placeholder="you@example.com"
+            class="w-full px-5 py-3 rounded-xl border focus:ring-2 focus:ring-red-400 outline-none transition" required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input type="password" id="password" placeholder="••••••••"
+            class="w-full px-5 py-3 rounded-xl border focus:ring-2 focus:ring-red-400 outline-none transition" required>
+        </div>
+
+        <button type="submit" id="submitBtn"
+          class="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-red-500 transition mt-2">
+          Sign In
+        </button>
+      </form>
+
+      <p class="text-center mt-6 text-sm text-gray-500">
+        No account?
+        <a href="register.html" class="text-red-500 font-semibold hover:underline">Create one free</a>
+      </p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { loginUser } from "./js/auth.js";
+
+    const form = document.getElementById("loginForm");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 4000);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Signing in…";
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await loginUser(email, password);
+      } catch (err) {
+        showToast("❌ " + (err.message || "Login failed. Please try again."));
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Sign In";
+      }
+    });
+  </script>
 
 </body>
+
 </html>

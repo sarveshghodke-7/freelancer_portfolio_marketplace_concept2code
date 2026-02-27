@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | TalentForge</title>
+    <script src="js/theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <script src="js/transitions.js" defer></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+        }
+
+        /* ── Card number formatting ── */
+        .card-input {
+            letter-spacing: 0.12em;
+        }
+
+        /* ── Credit card preview ── */
+        .card-preview {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 1.25rem;
+            padding: 1.75rem 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease;
+        }
+
+        .card-preview::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card-preview::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            right: 30px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .card-chip {
+            width: 2.5rem;
+            height: 1.8rem;
+            background: linear-gradient(135deg, #d4af37, #f0d060);
+            border-radius: 0.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ── Input styling ── */
+        .pay-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 0.6rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+
+        .pay-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        .pay-input.error {
+            border-color: #ef4444;
+        }
+
+        /* ── Stripe logo style header ── */
+        .stripe-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .stripe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+        }
+
+        /* ── Pay button ── */
+        #payBtn {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        #payBtn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        #payBtn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        #payBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* ── Spinner inside button ── */
+        .btn-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.4rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Success overlay ── */
+        #successOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.97);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #successOverlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ── Checkmark animation ── */
+        .checkmark-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-text {
+            animation: slideUp 0.4s ease 0.5s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* ── Security badges ── */
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #9ca3af;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-4 py-10">
+
+    <!-- Success Overlay -->
+    <div id="successOverlay">
+        <div class="checkmark-circle">✓</div>
+        <div class="success-text text-center mt-6">
+            <h2 class="text-2xl font-extrabold text-gray-900">Payment Successful!</h2>
+            <p class="text-gray-500 mt-2" id="successMsg">Your payment has been processed.</p>
+            <div class="mt-2 text-sm text-gray-400" id="successTxId"></div>
+            <div class="mt-8 flex gap-3 justify-center">
+                <a href="dashboard.html"
+                    class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition font-medium text-sm">
+                    Go to Dashboard
+                </a>
+                <button onclick="window.print()"
+                    class="border border-gray-200 text-gray-600 px-6 py-3 rounded-xl hover:border-gray-400 transition font-medium text-sm">
+                    🧾 Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="w-full max-w-4xl grid md:grid-cols-2 gap-8 items-start">
+
+        <!-- LEFT: Order summary -->
+        <div>
+            <!-- Logo -->
+            <a href="index.html" class="inline-flex items-center gap-2 text-xl font-bold mb-8">
+                <span class="bg-black text-white px-2 py-1 rounded-md text-sm">{"</>"}</span>
+                TalentForge
+            </a>
+
+            <h2 class="text-2xl font-extrabold text-gray-900 mb-1">Complete your payment</h2>
+            <p class="text-gray-500 text-sm mb-8">You're hiring a developer for your project.</p>
+
+            <!-- Summary card -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
+                    <div>
+                        <p class="font-semibold text-gray-900" id="summaryFreelancer">Freelancer</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Project hire request</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-900 text-lg" id="summaryAmount">$0</p>
+                        <p class="text-xs text-gray-400">one-time</p>
+                    </div>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Platform fee (5%)</span>
+                        <span id="summaryFee">$0</span>
+                    </div>
+                    <div class="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-100 mt-2">
+                        <span>Total</span>
+                        <span id="summaryTotal">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual card preview -->
+            <div class="card-preview" id="cardPreview">
+                <div class="card-chip"></div>
+                <p class="text-lg font-mono tracking-widest mb-4" id="previewNumber">•••• •••• •••• ••••</p>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-0.5">Card Holder</p>
+                        <p class="font-semibold text-sm" id="previewName">Your Name</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-0.5">Expires</p>
+                        <p class="font-semibold text-sm" id="previewExpiry">MM/YY</p>
+                    </div>
+                    <div class="text-2xl font-bold italic opacity-80">VISA</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Payment form -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-bold text-gray-900">Payment Details</h3>
+                <span class="stripe-badge">🔒 SSL Secured</span>
+            </div>
+
+            <!-- Accepted cards -->
+            <div class="flex gap-2 mb-6">
+                <span class="px-3 py-1.5 border rounded-lg text-xs font-bold text-gray-600 bg-gray-50">VISA</span>
+                <span class="px-3 py-1.5 border rounded-lg text-xs font-bold text-gray-600 bg-gray-50">MASTERCARD</span>
+                <span class="px-3 py-1.5 border rounded-lg text-xs font-bold text-gray-600 bg-gray-50">AMEX</span>
+                <span class="px-3 py-1.5 border rounded-lg text-xs font-bold text-gray-600 bg-gray-50">RuPay</span>
+            </div>
+
+            <form id="paymentForm" class="space-y-5" novalidate>
+
+                <!-- Card number -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Card Number</label>
+                    <div class="relative">
+                        <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456"
+                            class="pay-input card-input pr-12">
+                        <span id="cardBrand"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold"></span>
+                    </div>
+                </div>
+
+                <!-- Card holder -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Cardholder Name</label>
+                    <input type="text" id="cardName" placeholder="Jane Doe" class="pay-input" autocomplete="cc-name">
+                </div>
+
+                <!-- Expiry + CVV -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Expiry Date</label>
+                        <input type="text" id="cardExpiry" maxlength="5" placeholder="MM/YY" class="pay-input"
+                            autocomplete="cc-exp">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                            CVV
+                            <span class="text-gray-400 font-normal">(?)</span>
+                        </label>
+                        <input type="text" id="cardCvv" maxlength="4" placeholder="•••" class="pay-input"
+                            autocomplete="cc-csc">
+                    </div>
+                </div>
+
+                <!-- Country (cosmetic) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Billing Country</label>
+                    <select class="pay-input text-gray-600">
+                        <option value="IN" selected>🇮🇳 India</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="GB">🇬🇧 United Kingdom</option>
+                        <option value="AU">🇦🇺 Australia</option>
+                        <option value="CA">🇨🇦 Canada</option>
+                    </select>
+                </div>
+
+                <!-- Pay button -->
+                <button type="submit" id="payBtn" class="w-full text-white py-4 rounded-xl font-bold text-base mt-2">
+                    <span id="payBtnText">Pay <span id="payBtnAmount">$0</span></span>
+                </button>
+
+                <!-- Error message -->
+                <p id="formError" class="text-red-500 text-sm text-center hidden"></p>
+
+            </form>
+
+            <!-- Security footer -->
+            <div class="mt-6 pt-5 border-t border-gray-100 flex justify-center gap-5">
+                <span class="security-badge">🔒 256-bit Encryption</span>
+                <span class="security-badge">✅ PCI DSS Compliant</span>
+                <span class="security-badge">🛡️ Fraud Protection</span>
+            </div>
+
+            <p class="text-center text-xs text-gray-400 mt-3">
+                Payments powered by <strong>TalentForge Pay</strong> · Funds held in escrow until project completion.
+            </p>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from "./firebase/firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { savePayment } from "./js/auth.js";
+
+        /* ── URL params ── */
+        const params = new URLSearchParams(window.location.search);
+        const requestId = params.get("requestId");
+        const freelancerId = params.get("freelancerId");
+        const budget = parseFloat(params.get("budget") || "0");
+        const freelancerName = decodeURIComponent(params.get("name") || "Freelancer");
+
+        /* ── Computed amounts ── */
+        const fee = parseFloat((budget * 0.05).toFixed(2));
+        const total = parseFloat((budget + fee).toFixed(2));
+
+        /* ── Populate summary ── */
+        document.getElementById("summaryFreelancer").textContent = freelancerName;
+        document.getElementById("summaryAmount").textContent = `$${budget}`;
+        document.getElementById("summaryFee").textContent = `$${fee}`;
+        document.getElementById("summaryTotal").textContent = `$${total}`;
+        document.getElementById("payBtnAmount").textContent = `$${total}`;
+
+        /* ── Auth guard ── */
+        let currentUser = null;
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.href = "login.html"; return; }
+            currentUser = user;
+        });
+
+        /* ── Card number formatting ── */
+        const cardNumberInput = document.getElementById("cardNumber");
+        const cardBrand = document.getElementById("cardBrand");
+        const previewNumber = document.getElementById("previewNumber");
+        const previewName = document.getElementById("previewName");
+        const previewExpiry = document.getElementById("previewExpiry");
+
+        cardNumberInput.addEventListener("input", (e) => {
+            let v = e.target.value.replace(/\D/g, "").substring(0, 16);
+            v = v.replace(/(.{4})/g, "$1 ").trim();
+            e.target.value = v;
+
+            // Live card preview
+            previewNumber.textContent = v.padEnd(19, "•").replace(/(.{5})/g, "$1 ").trim() || "•••• •••• •••• ••••";
+
+            // Brand detection
+            const raw = v.replace(/\s/g, "");
+            if (/^4/.test(raw)) { cardBrand.textContent = "VISA"; }
+            else if (/^5[1-5]/.test(raw)) { cardBrand.textContent = "MC"; }
+            else if (/^3[47]/.test(raw)) { cardBrand.textContent = "AMEX"; }
+            else if (/^6/.test(raw)) { cardBrand.textContent = "RuPay"; }
+            else { cardBrand.textContent = ""; }
+        });
+
+        document.getElementById("cardName").addEventListener("input", (e) => {
+            previewName.textContent = e.target.value || "Your Name";
+        });
+
+        document.getElementById("cardExpiry").addEventListener("input", (e) => {
+            let v = e.target.value.replace(/\D/g, "");
+            if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2, 4);
+            e.target.value = v;
+            previewExpiry.textContent = v || "MM/YY";
+        });
+
+        /* ── Validation ── */
+        function showError(msg) {
+            const el = document.getElementById("formError");
+            el.textContent = msg;
+            el.classList.remove("hidden");
+        }
+        function hideError() {
+            document.getElementById("formError").classList.add("hidden");
+        }
+
+        function luhnCheck(num) {
+            // Luhn algorithm for card validation
+            let sum = 0, alt = false;
+            for (let i = num.length - 1; i >= 0; i--) {
+                let n = parseInt(num[i], 10);
+                if (alt) { n *= 2; if (n > 9) n -= 9; }
+                sum += n; alt = !alt;
+            }
+            return sum % 10 === 0;
+        }
+
+        /* ── Generate fake transaction ID ── */
+        function genTxId() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return "TF-" + Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+        }
+
+        /* ── Submit ── */
+        const form = document.getElementById("paymentForm");
+        const payBtn = document.getElementById("payBtn");
+        const payText = document.getElementById("payBtnText");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const rawNumber = cardNumberInput.value.replace(/\s/g, "");
+            const name = document.getElementById("cardName").value.trim();
+            const expiry = document.getElementById("cardExpiry").value.trim();
+            const cvv = document.getElementById("cardCvv").value.trim();
+
+            // Validation
+            if (rawNumber.length < 13) { showError("Please enter a valid card number."); return; }
+            if (!luhnCheck(rawNumber)) { showError("Card number is invalid. Please check and try again."); return; }
+            if (!name) { showError("Please enter the cardholder name."); return; }
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) { showError("Please enter a valid expiry date (MM/YY)."); return; }
+            const [mm, yy] = expiry.split("/").map(Number);
+            const now = new Date();
+            if (mm < 1 || mm > 12 || yy + 2000 < now.getFullYear() || (yy + 2000 === now.getFullYear() && mm < now.getMonth() + 1)) {
+                showError("Your card has expired."); return;
+            }
+            if (cvv.length < 3) { showError("Please enter a valid CVV."); return; }
+
+            // Loading state
+            payBtn.disabled = true;
+            payText.innerHTML = `<span class="btn-spinner"></span> Processing…`;
+
+            // Simulate payment gateway delay (1.5–2.5s)
+            await new Promise(r => setTimeout(r, 1500 + Math.random() * 1000));
+
+            const txId = genTxId();
+
+            try {
+                if (currentUser && requestId) {
+                    await savePayment({
+                        requestId,
+                        freelancerId,
+                        clientId: currentUser.uid,
+                        amount: total,
+                        fee,
+                        transactionId: txId,
+                        status: "completed",
+                        last4: rawNumber.slice(-4),
+                        cardHolder: name,
+                        paidAt: new Date()
+                    });
+                }
+            } catch (err) {
+                // Non-blocking — still show success (demo mode)
+                console.warn("Firestore save skipped:", err.message);
+            }
+
+            // Show success
+            document.getElementById("successMsg").textContent =
+                `$${total} sent to ${freelancerName}. Funds are held in escrow.`;
+            document.getElementById("successTxId").innerHTML =
+                `Transaction ID: <code class="font-mono bg-gray-100 px-2 py-0.5 rounded text-xs">${txId}</code>`;
+            document.getElementById("successOverlay").classList.add("show");
+        });
+    </script>
+
+</body>
+
+</html>

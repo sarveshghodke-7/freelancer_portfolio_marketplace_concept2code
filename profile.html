@@ -1,39 +1,336 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Developer Profile</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>body{font-family:'Inter',sans-serif}</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freelancer Profile | TalentForge</title>
+  <script src="js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="js/transitions.js" defer></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #111;
+      color: #fff;
+      padding: 0.85rem 1.4rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Modal backdrop fade */
+    #hireModal {
+      transition: opacity 0.2s;
+    }
+
+    #hireModal.hidden {
+      display: none;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid #e5e7eb;
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 6rem auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-[#F8F9FB]">
+<body class="bg-[#F8F9FB] text-[#0F0F0F]">
 
-<div class="max-w-5xl mx-auto px-6 py-20">
+  <!-- Toast -->
+  <div id="toast"></div>
 
-<div class="bg-white p-10 rounded-3xl shadow-xl">
+  <!-- Navbar -->
+  <nav
+    class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center bg-white/70 backdrop-blur-lg shadow-sm rounded-full mt-6">
+    <a href="index.html" class="text-xl font-bold flex items-center gap-2">
+      <span class="bg-black text-white px-2 py-1 rounded-md">{"</>"}</span>
+      TalentForge
+    </a>
+    <div class="flex items-center gap-4 text-sm font-medium">
+      <a href="browse.html" class="hover:text-red-500 transition">← Back to Browse</a>
+      <span id="navAuthLink">
+        <a href="login.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Login</a>
+      </span>
+    </div>
+  </nav>
 
-<h2 class="text-3xl font-bold">Akash Sharma</h2>
-<p class="text-gray-500 mt-2">Full Stack Developer</p>
+  <!-- Loading state -->
+  <div id="loadingSpinner">
+    <div class="spinner"></div>
+  </div>
 
-<div class="mt-6">
-  <span class="bg-gray-100 px-4 py-2 rounded-full text-sm">React</span>
-  <span class="bg-gray-100 px-4 py-2 rounded-full text-sm">Node.js</span>
-  <span class="bg-gray-100 px-4 py-2 rounded-full text-sm">Firebase</span>
-</div>
+  <!-- Profile Card -->
+  <div id="profileCard" class="max-w-3xl mx-auto px-6 py-16 hidden">
 
-<p class="mt-6 text-gray-600">
-  Experienced developer specializing in scalable web applications and modern frontend architectures.
-</p>
+    <div class="bg-white p-10 rounded-3xl shadow-xl">
 
-<button class="mt-8 bg-black text-white px-8 py-3 rounded-xl hover:bg-red-500 transition">
-  Hire Developer
-</button>
+      <!-- Avatar + header -->
+      <div class="flex items-center gap-6 mb-8">
+        <div id="profileAvatar"
+          class="w-20 h-20 rounded-full bg-gradient-to-br from-red-400 to-orange-300 flex items-center justify-center text-white font-bold text-3xl flex-shrink-0">
+          F
+        </div>
+        <div>
+          <h2 id="profileBio" class="text-2xl font-bold leading-snug"></h2>
+          <p id="profileRate" class="text-red-500 font-semibold mt-1 text-lg"></p>
+          <span id="profileAvailability" class="inline-block mt-2 px-4 py-1 rounded-full text-sm font-medium"></span>
+        </div>
+      </div>
 
-</div>
+      <!-- Skills -->
+      <div class="mb-8">
+        <h4 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Skills</h4>
+        <div id="profileSkills" class="flex flex-wrap gap-2"></div>
+      </div>
 
-</div>
+      <hr class="border-gray-100 mb-8">
+
+      <!-- Hire area -->
+      <div id="hireArea"></div>
+
+    </div>
+  </div>
+
+  <!-- Not Found -->
+  <div id="notFound" class="max-w-3xl mx-auto px-6 py-24 text-center hidden">
+    <p class="text-5xl mb-4">😕</p>
+    <h2 class="text-2xl font-bold mb-2">Profile Not Found</h2>
+    <p class="text-gray-500 mb-6">This freelancer profile doesn't exist or has been removed.</p>
+    <a href="browse.html"
+      class="inline-block bg-black text-white px-6 py-3 rounded-xl hover:bg-red-500 transition">Browse Freelancers</a>
+  </div>
+
+  <!-- Hire Modal -->
+  <div id="hireModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 px-4">
+    <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl" onclick="event.stopPropagation()">
+      <h3 class="text-xl font-semibold mb-2">Send Hire Request</h3>
+      <p id="modalFreelancerName" class="text-gray-500 text-sm mb-6"></p>
+
+      <label class="block text-sm font-medium text-gray-700 mb-1">Project Description</label>
+      <textarea id="hireMessage" placeholder="Describe your project and requirements..." rows="4"
+        class="w-full px-4 py-3 border rounded-xl mb-4 focus:ring-2 focus:ring-red-400 outline-none transition resize-none"></textarea>
+
+      <label class="block text-sm font-medium text-gray-700 mb-1">Your Budget</label>
+      <div class="relative mb-6">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+        <input type="number" id="hireBudget" placeholder="500"
+          class="w-full pl-8 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-400 outline-none transition">
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button id="cancelBtn"
+          class="px-5 py-2.5 border rounded-xl text-gray-600 hover:border-gray-400 transition">Cancel</button>
+        <button id="sendHireBtn"
+          class="bg-black text-white px-5 py-2.5 rounded-xl hover:bg-red-500 transition font-medium">
+          Send Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      getFreelancerProfile,
+      createHireRequest,
+      getUserRole
+    } from "./js/auth.js";
+
+    import { auth } from "./firebase/firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+    /* ── Toast ── */
+    function showToast(msg, isError = false, duration = 3500) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.background = isError ? "#dc2626" : "#111";
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), duration);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const freelancerId = params.get("id");
+
+    const navAuthLink = document.getElementById("navAuthLink");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const profileCard = document.getElementById("profileCard");
+    const notFound = document.getElementById("notFound");
+    const hireModal = document.getElementById("hireModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const sendHireBtn = document.getElementById("sendHireBtn");
+    const messageInput = document.getElementById("hireMessage");
+    const budgetInput = document.getElementById("hireBudget");
+    const hireArea = document.getElementById("hireArea");
+    const modalFreelancerName = document.getElementById("modalFreelancerName");
+
+    let currentUser = null;
+    let userRole = null;
+    let profileData = null;
+
+    /* ── Auth state (resolve once) ── */
+    const authReady = new Promise(resolve => {
+      onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (user) {
+          userRole = await getUserRole(user.uid);
+          navAuthLink.innerHTML = `<a href="dashboard.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Dashboard</a>`;
+        } else {
+          navAuthLink.innerHTML = `<a href="login.html" class="bg-black text-white px-5 py-2 rounded-full hover:bg-red-500 transition">Login</a>`;
+        }
+        resolve();
+      });
+    });
+
+    /* ── Fetch profile ── */
+    if (!freelancerId) {
+      loadingSpinner.classList.add("hidden");
+      notFound.classList.remove("hidden");
+    } else {
+      profileData = await getFreelancerProfile(freelancerId);
+      await authReady;
+
+      loadingSpinner.classList.add("hidden");
+
+      if (!profileData) {
+        notFound.classList.remove("hidden");
+      } else {
+        profileCard.classList.remove("hidden");
+
+        // Avatar letter
+        document.getElementById("profileAvatar").textContent = (profileData.bio || "F")[0].toUpperCase();
+
+        // Bio
+        document.getElementById("profileBio").textContent = profileData.bio || "Experienced Freelancer";
+
+        // Rate
+        document.getElementById("profileRate").textContent = "$" + (profileData.rate || 0) + "/hr";
+
+        // Availability badge
+        const avEl = document.getElementById("profileAvailability");
+        const av = profileData.availability || "unknown";
+        const avMap = {
+          available: ["✅ Available", "bg-green-100 text-green-700"],
+          busy: ["🟡 Busy", "bg-yellow-100 text-yellow-700"],
+          unavailable: ["🔴 Unavailable", "bg-gray-200 text-gray-600"]
+        };
+        const [avText, avClass] = avMap[av] || ["Unknown", "bg-gray-100 text-gray-500"];
+        avEl.textContent = avText;
+        avEl.className += " " + avClass;
+
+        // Skills
+        const skillsEl = document.getElementById("profileSkills");
+        const skillsArr = Array.isArray(profileData.skills) ? profileData.skills : (profileData.skills ? profileData.skills.split(",").map(s => s.trim()) : []);
+
+        if (skillsArr.length) {
+          skillsEl.innerHTML = skillsArr.map(s =>
+            `<span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm">${s}</span>`
+          ).join("");
+        } else {
+          skillsEl.innerHTML = `<span class="text-gray-400 text-sm">No skills listed yet.</span>`;
+        }
+
+        // Hire area — depends on auth state
+        if (!currentUser) {
+          // Not logged in
+          hireArea.innerHTML = `
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-center gap-4">
+              <span class="text-2xl">🔒</span>
+              <div>
+                <p class="font-semibold text-amber-800">Login required to hire</p>
+                <p class="text-sm text-amber-700 mt-0.5">You need to be logged in as a client to send a hire request.</p>
+              </div>
+              <a href="login.html" class="ml-auto bg-black text-white px-5 py-2 rounded-xl hover:bg-red-500 transition text-sm font-medium flex-shrink-0">Login</a>
+            </div>`;
+        } else if (userRole !== "client") {
+          // Logged in but not a client
+          hireArea.innerHTML = `
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 flex items-center gap-4">
+              <span class="text-2xl">ℹ️</span>
+              <p class="text-gray-600 text-sm">Only <strong>clients</strong> can send hire requests. You are logged in as a <strong>${userRole}</strong>.</p>
+            </div>`;
+        } else {
+          // Client — show hire button
+          hireArea.innerHTML = `
+            <button id="hireBtn" class="w-full bg-black text-white px-8 py-3 rounded-xl hover:bg-red-500 transition font-semibold text-base">
+              Hire Freelancer
+            </button>`;
+
+          document.getElementById("hireBtn").addEventListener("click", () => {
+            modalFreelancerName.textContent = `To: ${profileData.bio || "this freelancer"}`;
+            hireModal.classList.remove("hidden");
+          });
+        }
+
+        /* ── Send hire ── */
+        sendHireBtn.addEventListener("click", async () => {
+          if (!messageInput.value.trim() || !budgetInput.value) {
+            showToast("⚠️ Please fill in all fields.", true);
+            return;
+          }
+
+          sendHireBtn.disabled = true;
+          sendHireBtn.textContent = "Sending…";
+
+          try {
+            await createHireRequest({
+              freelancerId: freelancerId,
+              clientId: currentUser.uid,
+              message: messageInput.value.trim(),
+              budget: budgetInput.value
+            });
+
+            hireModal.classList.add("hidden");
+            messageInput.value = "";
+            budgetInput.value = "";
+            showToast("✅ Hire request sent successfully!");
+          } catch (err) {
+            showToast("❌ Failed to send request. Try again.", true);
+          } finally {
+            sendHireBtn.disabled = false;
+            sendHireBtn.textContent = "Send Request";
+          }
+        });
+      }
+    }
+
+    /* ── Close modal ── */
+    cancelBtn.addEventListener("click", () => hireModal.classList.add("hidden"));
+    hireModal.addEventListener("click", (e) => {
+      if (e.target === hireModal) hireModal.classList.add("hidden");
+    });
+
+  </script>
 
 </body>
+
 </html>

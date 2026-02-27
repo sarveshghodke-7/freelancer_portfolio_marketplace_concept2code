@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Milestones | TalentForge</title>
+    <script src="js/theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <script src="js/transitions.js" defer></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg, #f8f9fb);
+            color: var(--text, #0f0f0f);
+        }
+
+        /* ── Dark mode ── */
+        [data-theme="dark"] body,
+        [data-theme="dark"] {
+            background: #0f0f0f;
+            color: #f3f4f6;
+        }
+
+        [data-theme="dark"] .card {
+            background: #1a1a1a !important;
+            border-color: #2d2d2d !important;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] textarea,
+        [data-theme="dark"] select {
+            background: #252525 !important;
+            border-color: #3d3d3d !important;
+            color: #f3f4f6 !important;
+        }
+
+        [data-theme="dark"] .text-gray-500 {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .text-gray-700 {
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background: #1a1a1a !important;
+        }
+
+        [data-theme="dark"] .bg-gray-50 {
+            background: #252525 !important;
+        }
+
+        [data-theme="dark"] .border-gray-100,
+        [data-theme="dark"] .border-gray-200 {
+            border-color: #2d2d2d !important;
+        }
+
+        /* ── Milestone timeline ── */
+        .milestone-item {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .milestone-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 1.1rem;
+            top: 2.5rem;
+            bottom: -0.5rem;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        [data-theme="dark"] .milestone-item:not(:last-child)::before {
+            background: #2d2d2d;
+        }
+
+        .milestone-item.status-completed::before {
+            background: #10b981;
+        }
+
+        .milestone-item.status-in_review::before {
+            background: #f59e0b;
+        }
+
+        .milestone-dot {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .milestone-dot:hover {
+            transform: scale(1.1);
+        }
+
+        .dot-pending {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #6b7280;
+        }
+
+        .dot-in_progress {
+            background: #ede9fe;
+            border-color: #8b5cf6;
+            color: #7c3aed;
+        }
+
+        .dot-in_review {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #d97706;
+        }
+
+        .dot-completed {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #059669;
+        }
+
+        [data-theme="dark"] .dot-pending {
+            background: #252525;
+            border-color: #4b5563;
+            color: #9ca3af;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 1rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+        }
+
+        /* ── Progress bar ── */
+        .progress-track {
+            background: #f3f4f6;
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            transition: all 0.5s;
+        }
+
+        [data-theme="dark"] .progress-track {
+            background: #2d2d2d;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #6366f1, #10b981);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Status badge ── */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-in_progress {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        .badge-in_review {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        [data-theme="dark"] .badge-pending {
+            background: #252525;
+            color: #9ca3af;
+        }
+
+        /* ── Form input ── */
+        .tf-input {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        .tf-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        /* ── Modal ── */
+        #milestoneModal {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        #milestoneModal.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="dark"] .modal-box {
+            background: #1a1a1a;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            color: white;
+            padding: 0.65rem 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 999;
+            white-space: nowrap;
+        }
+
+        #toast.show {
+            opacity: 1;
+        }
+
+        /* ── Spinner ── */
+        .spinner {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            display: inline-block;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.4rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- Add Milestone Modal -->
+    <div id="milestoneModal">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-bold text-lg" id="modalTitle">Add Milestone</h3>
+                <button onclick="closeModal()"
+                    class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+            </div>
+
+            <form id="milestoneForm" class="space-y-4">
+                <input type="hidden" id="editMilestoneId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                    <input type="text" id="mTitle" placeholder="e.g. Design Wireframes" class="tf-input" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="mDesc" rows="2" placeholder="What will be delivered?" class="tf-input"
+                        style="resize:vertical"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount ($)</label>
+                        <input type="number" id="mAmount" placeholder="0" min="0" class="tf-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                        <input type="date" id="mDue" class="tf-input">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" id="modalSaveBtn"
+                        class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition text-sm">
+                        Save Milestone
+                    </button>
+                    <button type="button" onclick="closeModal()"
+                        class="px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-medium hover:border-gray-400 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Page layout -->
+    <div class="max-w-4xl mx-auto px-4 py-10">
+
+        <!-- Header -->
+        <div class="flex items-center gap-4 mb-8">
+            <a href="dashboard.html"
+                class="p-2 rounded-xl border border-gray-200 hover:border-gray-400 transition text-gray-500 hover:text-gray-700">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+            </a>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span
+                        class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">PROJECT</span>
+                    <h1 class="text-xl font-extrabold" id="projectTitle">Loading…</h1>
+                </div>
+                <p class="text-sm text-gray-500 mt-0.5" id="projectMeta"></p>
+            </div>
+            <div class="ml-auto" id="addMilestoneBtnWrap" style="display:none">
+                <button onclick="openModal()" id="addMilestoneBtn"
+                    class="bg-black text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-600 transition flex items-center gap-2">
+                    <span>＋</span> Add Milestone
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress overview card -->
+        <div class="card p-6 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="font-bold text-base">Overall Progress</h2>
+                <span class="text-sm font-bold text-indigo-600" id="progressPct">0%</span>
+            </div>
+            <div class="progress-track mb-4">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="grid grid-cols-4 gap-3 text-center">
+                <div>
+                    <p class="text-xl font-extrabold text-gray-900" id="countTotal">0</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Total</p>
+                </div>
+                <div>
+                    <p class="text-xl font-extrabold text-purple-600" id="countInProgress">0</p>
+                    <p class="text-xs text-gray-500 mt-0.5">In Progress</p>
+                </div>
+                <div>
+                    <p class="text-xl font-extrabold text-amber-500" id="countReview">0</p>
+                    <p class="text-xs text-gray-500 mt-0.5">In Review</p>
+                </div>
+                <div>
+                    <p class="text-xl font-extrabold text-emerald-600" id="countDone">0</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Completed</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total budget breakdown -->
+        <div class="card px-6 py-4 mb-6 flex flex-wrap gap-6 items-center" id="budgetCard">
+            <div>
+                <p class="text-xs text-gray-500 mb-0.5">Total Milestone Value</p>
+                <p class="font-extrabold text-lg" id="budgetTotal">$0</p>
+            </div>
+            <div class="h-8 w-px bg-gray-100"></div>
+            <div>
+                <p class="text-xs text-gray-500 mb-0.5">Paid Out</p>
+                <p class="font-extrabold text-lg text-emerald-600" id="budgetPaid">$0</p>
+            </div>
+            <div class="h-8 w-px bg-gray-100"></div>
+            <div>
+                <p class="text-xs text-gray-500 mb-0.5">Remaining</p>
+                <p class="font-extrabold text-lg text-indigo-600" id="budgetRemaining">$0</p>
+            </div>
+        </div>
+
+        <!-- Milestones timeline -->
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-bold text-base">Milestones</h2>
+                <span class="text-xs text-gray-400" id="milestoneCount">0 milestones</span>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingState" class="text-center py-12 text-gray-400">
+                <div
+                    class="w-8 h-8 border-2 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3">
+                </div>
+                Loading milestones…
+            </div>
+
+            <!-- Empty state -->
+            <div id="emptyState" class="text-center py-12 text-gray-400 hidden">
+                <p class="text-4xl mb-3">🏁</p>
+                <p class="font-semibold text-gray-600">No milestones yet</p>
+                <p class="text-sm mt-1" id="emptyHint">Add your first milestone to get started.</p>
+            </div>
+
+            <!-- Timeline list -->
+            <div id="milestoneList" class="space-y-4" style="display:none"></div>
+        </div>
+
+    </div><!-- /max-w-4xl -->
+
+    <script type="module">
+        import { auth } from "./firebase/firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import {
+            protectPage, getUserRole, getHireRequestById,
+            createMilestone, getMilestonesByRequest,
+            updateMilestone, deleteMilestone
+        } from "./js/auth.js";
+
+        protectPage();
+
+        // ── Toast ──
+        window.showToast = function (msg, err = false) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.style.background = err ? "#dc2626" : "#111";
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 3000);
+        };
+
+        // ── URL params ──
+        const params = new URLSearchParams(window.location.search);
+        const requestId = params.get("requestId");
+        const freelancerId = params.get("freelancerId");
+        const clientId = params.get("clientId");
+        const title = decodeURIComponent(params.get("title") || "Untitled Project");
+        const budget = parseFloat(params.get("budget") || "0");
+
+        if (!requestId) { window.location.href = "dashboard.html"; }
+
+        document.getElementById("projectTitle").textContent = title;
+        document.getElementById("projectMeta").textContent = `Budget: $${budget}`;
+
+        let currentUser = null;
+        let userRole = null;
+        let milestones = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "login.html"; return; }
+            currentUser = user;
+            userRole = await getUserRole(user.uid);
+
+            // Client can add milestones
+            if (userRole === "client" && user.uid === clientId) {
+                document.getElementById("addMilestoneBtnWrap").style.display = "block";
+            }
+
+            await loadMilestones();
+        });
+
+        // ── Load & Render ──
+        async function loadMilestones() {
+            document.getElementById("loadingState").classList.remove("hidden");
+            document.getElementById("emptyState").classList.add("hidden");
+            document.getElementById("milestoneList").style.display = "none";
+
+            try {
+                milestones = await getMilestonesByRequest(requestId);
+            } catch (e) {
+                milestones = [];
+            }
+
+            document.getElementById("loadingState").classList.add("hidden");
+            renderMilestones();
+        }
+
+        function renderMilestones() {
+            const list = document.getElementById("milestoneList");
+            const empty = document.getElementById("emptyState");
+
+            // Stats
+            const total = milestones.length;
+            const inProgress = milestones.filter(m => m.status === "in_progress").length;
+            const inReview = milestones.filter(m => m.status === "in_review").length;
+            const completed = milestones.filter(m => m.status === "completed").length;
+            const pct = total ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById("countTotal").textContent = total;
+            document.getElementById("countInProgress").textContent = inProgress;
+            document.getElementById("countReview").textContent = inReview;
+            document.getElementById("countDone").textContent = completed;
+            document.getElementById("progressPct").textContent = pct + "%";
+            document.getElementById("progressBar").style.width = pct + "%";
+            document.getElementById("milestoneCount").textContent = total + " milestone" + (total !== 1 ? "s" : "");
+
+            // Budget
+            const totalBudget = milestones.reduce((s, m) => s + (parseFloat(m.amount) || 0), 0);
+            const paidBudget = milestones.filter(m => m.status === "completed").reduce((s, m) => s + (parseFloat(m.amount) || 0), 0);
+            document.getElementById("budgetTotal").textContent = "$" + totalBudget.toFixed(2);
+            document.getElementById("budgetPaid").textContent = "$" + paidBudget.toFixed(2);
+            document.getElementById("budgetRemaining").textContent = "$" + (totalBudget - paidBudget).toFixed(2);
+
+            if (total === 0) {
+                empty.classList.remove("hidden");
+                list.style.display = "none";
+                return;
+            }
+
+            list.style.display = "block";
+            list.innerHTML = "";
+
+            milestones.forEach((m, idx) => {
+                const isClient = userRole === "client" && currentUser?.uid === clientId;
+                const isFreelancer = userRole === "freelancer" && currentUser?.uid === freelancerId;
+                const statusLabel = { pending: "Pending", in_progress: "In Progress", in_review: "In Review", completed: "Completed" };
+                const statusEmoji = { pending: "○", in_progress: "◑", in_review: "◕", completed: "●" };
+                const dueStr = m.dueDate ? `Due ${new Date(m.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : "";
+
+                const item = document.createElement("div");
+                item.className = `milestone-item status-${m.status}`;
+                item.dataset.id = m.id;
+
+                item.innerHTML = `
+          <div class="milestone-dot dot-${m.status}" title="${statusLabel[m.status] || m.status}">
+            ${statusEmoji[m.status] || "○"}
+          </div>
+          <div class="card p-5 ml-2">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <span class="text-xs font-bold text-gray-400">#${idx + 1}</span>
+                  <h3 class="font-bold text-base leading-snug">${m.title}</h3>
+                  <span class="status-badge badge-${m.status}">${statusLabel[m.status] || m.status}</span>
+                </div>
+                ${m.description ? `<p class="text-sm text-gray-500 mt-1 leading-relaxed">${m.description}</p>` : ""}
+                <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                  ${m.amount ? `<span class="font-semibold text-gray-700">💰 $${parseFloat(m.amount).toFixed(2)}</span>` : ""}
+                  ${dueStr ? `<span>📅 ${dueStr}</span>` : ""}
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 items-end flex-shrink-0">
+                <!-- Freelancer actions -->
+                ${isFreelancer && m.status === "pending" ? `
+                  <button class="action-btn text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-200 transition font-medium"
+                    data-action="start" data-id="${m.id}">▶ Start</button>` : ""}
+                ${isFreelancer && m.status === "in_progress" ? `
+                  <button class="action-btn text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition font-medium"
+                    data-action="review" data-id="${m.id}">📤 Submit for Review</button>` : ""}
+                <!-- Client actions -->
+                ${isClient && m.status === "in_review" ? `
+                  <button class="action-btn text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-200 transition font-medium"
+                    data-action="complete" data-id="${m.id}">✅ Mark Complete</button>` : ""}
+                ${isClient ? `
+                  <div class="flex gap-1.5">
+                    <button class="action-btn text-xs text-gray-400 hover:text-indigo-600 p-1 rounded transition"
+                      data-action="edit" data-id="${m.id}" title="Edit">✏️</button>
+                    <button class="action-btn text-xs text-gray-400 hover:text-red-500 p-1 rounded transition"
+                      data-action="delete" data-id="${m.id}" title="Delete">🗑️</button>
+                  </div>` : ""}
+              </div>
+            </div>
+          </div>
+        `;
+                list.appendChild(item);
+            });
+
+            // Action button handlers
+            list.querySelectorAll(".action-btn").forEach(btn => {
+                btn.addEventListener("click", () => handleAction(btn.dataset.action, btn.dataset.id, btn));
+            });
+        }
+
+        async function handleAction(action, id, btn) {
+            btn.disabled = true;
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span>';
+
+            try {
+                if (action === "start") await updateMilestone(id, { status: "in_progress" });
+                if (action === "review") await updateMilestone(id, { status: "in_review" });
+                if (action === "complete") await updateMilestone(id, { status: "completed" });
+                if (action === "edit") {
+                    const m = milestones.find(x => x.id === id);
+                    if (m) openModal(m);
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                    return;
+                }
+                if (action === "delete") {
+                    if (!confirm("Delete this milestone?")) { btn.disabled = false; btn.innerHTML = original; return; }
+                    await deleteMilestone(id);
+                    showToast("Milestone deleted.");
+                } else {
+                    showToast("✅ Milestone updated!");
+                }
+                await loadMilestones();
+            } catch (e) {
+                showToast("Error: " + e.message, true);
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }
+
+        // ── Modal ──
+        window.openModal = function (existing = null) {
+            document.getElementById("modalTitle").textContent = existing ? "Edit Milestone" : "Add Milestone";
+            document.getElementById("editMilestoneId").value = existing?.id || "";
+            document.getElementById("mTitle").value = existing?.title || "";
+            document.getElementById("mDesc").value = existing?.description || "";
+            document.getElementById("mAmount").value = existing?.amount || "";
+            document.getElementById("mDue").value = existing?.dueDate || "";
+            document.getElementById("modalSaveBtn").textContent = existing ? "Save Changes" : "Save Milestone";
+            document.getElementById("milestoneModal").classList.add("open");
+            document.getElementById("mTitle").focus();
+        };
+
+        window.closeModal = function () {
+            document.getElementById("milestoneModal").classList.remove("open");
+        };
+
+        // Close modal on backdrop click
+        document.getElementById("milestoneModal").addEventListener("click", (e) => {
+            if (e.target === document.getElementById("milestoneModal")) closeModal();
+        });
+
+        // ── Save milestone ──
+        document.getElementById("milestoneForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("modalSaveBtn");
+            const editId = document.getElementById("editMilestoneId").value;
+
+            const data = {
+                title: document.getElementById("mTitle").value.trim(),
+                description: document.getElementById("mDesc").value.trim(),
+                amount: parseFloat(document.getElementById("mAmount").value) || 0,
+                dueDate: document.getElementById("mDue").value,
+                requestId, clientId, freelancerId,
+                status: editId ? undefined : "pending",
+                order: editId ? undefined : milestones.length
+            };
+
+            if (!data.title) { showToast("Title is required.", true); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Saving…';
+
+            // Remove undefined fields
+            Object.keys(data).forEach(k => data[k] === undefined && delete data[k]);
+
+            try {
+                if (editId) {
+                    await updateMilestone(editId, data);
+                    showToast("✅ Milestone updated!");
+                } else {
+                    await createMilestone(data);
+                    showToast("🎉 Milestone added!");
+                }
+                closeModal();
+                await loadMilestones();
+            } catch (err) {
+                showToast("Error: " + err.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = editId ? "Save Changes" : "Save Milestone";
+            }
+        });
+    </script>
+
+    <!-- getHireRequestById shim — add to auth.js if not present -->
+    <script type="module">
+        // Ensure getHireRequestById is available (simple wrapper)
+        import { db } from "./firebase/firebase-config.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        window._getHireRequest = async (id) => {
+            const snap = await getDoc(doc(db, "hireRequests", id));
+            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+        };
+    </script>
+
+</body>
+
+</html>
